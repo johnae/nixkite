@@ -20,26 +20,28 @@ I'll write some usage instructions soon:ish, but this is what a pipeline looks l
 
 ```nix
 { cfg, pkgs }:
-with cfg; {
+with cfg.steps; {
 
   steps = {
-
     commands.docker.command = ''
       docker build -t docker/image:tag .
       docker push docker/image:tag
     '';
 
-    commands.deploy = {
-      dependsOn = [ "docker" ];
+    commands.deploy-development = {
+      dependsOn = [ commands.docker ];
       command = ''
-        echo do this
-        echo do that
+        do this
+        do that
       '';
     };
 
-    triggers.other-pipeline = {
-      trigger = "other-pipeline";
-      dependsOn = [ "deploy" "block" ];
+    triggers.gitops = {
+      trigger = "gitops";
+      dependsOn = [
+        commands.deploy-development
+        inputs.block
+      ];
     };
 
     inputs.block.input = "Continue with deployment?";
@@ -47,9 +49,7 @@ with cfg; {
       textInput.thingie.text = "hello";
       textInput.thingie.hint = "The name for the release";
     };
-
   };
-
 }
 
 ```

@@ -8,7 +8,7 @@ let
     '';
   };
 in
-  with cfg; {
+  with cfg.steps; {
 
     steps = {
 
@@ -21,7 +21,7 @@ in
       '';
 
       commands.deploy-development = {
-        dependsOn = [ "docker" ];
+        dependsOn = [ commands.docker ];
         command = ''
           do this
           do that
@@ -30,7 +30,10 @@ in
 
       triggers.gitops = {
         trigger = "gitops";
-        dependsOn = [ "deploy-development" "block" ];
+        dependsOn = [
+          commands.deploy-development
+          inputs.block
+        ];
       };
 
       inputs.block.input = "Continue with deployment?";

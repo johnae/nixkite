@@ -58,7 +58,10 @@ let
       default = name;
     };
     dependsOn = mkOption {
-      type = with types; nullOr (listOf (enum (allKeys steps)));
+      type = with types; with builtins; nullOr
+        (coercedTo (listOf attrs)
+          (x: map (s: if typeOf s == "string" then s else s.key) x)
+          (listOf (enum (allKeys steps))));
       default = null;
     };
     label = mkOption {
