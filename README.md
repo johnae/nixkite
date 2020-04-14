@@ -8,7 +8,7 @@ Nix is a completely declarative and purely functional package manager, build sys
 
 Nix has a novel and very powerful module system for defining the configuration options for your system. This module system has been used elsewhere such as in [home-manager](https://github.com/rycee/home-manager), [terranix](https://terranix.org) (use Nix rather than HCL to write your terraform configuration), [kubenix](https://github.com/xtruder/kubenix) (use Nix to write your kubernetes specs rather than yaml) and many other similar projects.
 
-Since I've used Buildkite for quite some time and I've already gone through two iterations of Buildkite pipeline generation writte in Nix, I figured I should try using the Nix module system rather than "just functions". This is that project.
+Since I've used Buildkite for quite some time and I've already gone through two iterations of Buildkite pipeline generation written in Nix, I figured I should try using the Nix module system rather than "just functions". This is that project.
 
 ### Notes
 
