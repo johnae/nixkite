@@ -32,7 +32,7 @@ in
         trigger = "gitops";
         dependsOn = [
           commands.deploy-development
-          inputs.block
+          "block" ## these can be either references to other steps or strings
         ];
       };
 
