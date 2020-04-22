@@ -57,12 +57,12 @@ with cfg.steps; {
 And you'd output the Buildkite pipeline something like this (if the above existed in a file called `examples/pipeline.nix`):
 
 ```sh
-nix-instantiate --eval --strict --json --argstr pipeline (pwd)/examples/pipeline.nix | jq .
+nix-instantiate --eval --strict --json --argstr pipeline "$(pwd)"/examples/pipeline.nix | jq .
 ```
 
 Actually running the pipeline on Buildkite would instead look something like this (you'd run this on an agent):
 
 ```sh
-nix-instantiate --eval --strict --json --argstr pipeline (pwd)/examples/pipeline.nix | \
+nix-instantiate --eval --strict --json --argstr pipeline "$(pwd)"/examples/pipeline.nix | \
     buildkite-agent pipeline upload --no-interpolation
 ````
