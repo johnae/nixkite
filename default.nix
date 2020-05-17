@@ -1,78 +1,59 @@
 { pipeline }:
 let
+  bklib = import ./lib;
   pkgs = import <nixpkgs> { };
-
-  stringHelpers = with builtins; with pkgs.lib;
-    rec {
-      isAlpha = c: (toUpper c) != (toLower c);
-      isUpper = c: (isAlpha c) && c == (toUpper c);
-      isLower = c: !(isUpper c);
-      toSnakeCase = s: concatStringsSep "" (
-        concatMap (
-          x:
-          if isUpper x then [ "_" (toLower x) ] else [ x ]
-        ) (stringToCharacters s)
-      );
-      isSnakeCase = s: s == (toSnakeCase s);
-    };
+  extendedLib = pkgs.lib.extend (self: super: bklib { lib = super; });
 
   sanitize =
     with pkgs;
+    with extendedLib;
     configuration:
     builtins.getAttr (builtins.typeOf configuration) {
       bool = configuration;
       int = configuration;
       string = configuration;
       list = map sanitize configuration;
-      set = lib.mapAttrs
-        (lib.const sanitize)
-        (lib.filterAttrs (name: value: name != "_module" && value != null) configuration);
+      set = mapAttrs
+        (const sanitize)
+        (filterAttrs (name: value: name != "_module" && value != null) configuration);
     };
 
-  config = import pipeline { inherit pkgs; cfg = result.config; };
+  config = import pipeline { inherit pkgs; lib = extendedLib; cfg = result.config; };
 
   result =
-    with pkgs;
-    with lib;
-    evalModules {
+    extendedLib.evalModules {
       modules = [
-        ./modules.nix
+        ./modules/buildkite.nix
         config
       ];
+      args = { inherit config; lib = extendedLib; };
     };
 
-  snakeKeys = with builtins; with pkgs.lib; with stringHelpers; s:
-    if typeOf s == "list"
-    then
-      map (snakeKeys) s
-    else
-      if typeOf s == "set"
-      then
-        mapAttrs' (n: v: nameValuePair (toSnakeCase n) v) s
-      else s;
-
-  ensureNoDuplicateKeys = with builtins; with pkgs.lib; s:
+  assertNoDuplicateKeys = with builtins; with extendedLib; s:
     let
-      keys = filter (v: v != null)
+      keys = filter
+        (v: v != null)
         (map (s: if hasAttr "key" s then s.key else null) s);
       uniqueKeys = unique keys;
     in
-      if (unique keys) == keys then s
-      else
-        let
-          dupes = unique (filter (v: (count (lv: v == lv) keys) > 1) keys);
-        in
-          throw "step keys must be unique, these are used more than once: ${concatStringsSep ", " dupes}";
+    if (unique keys) == keys then s
+    else
+      let
+        dupes = unique (filter (v: (count (lv: v == lv) keys) > 1) keys);
+      in
+      throw "step keys must be unique, these are used more than once: ${concatStringsSep ", " dupes}";
 
-  steps = with pkgs.lib;
-    ensureNoDuplicateKeys (flatten
-      (snakeKeys (
+  steps = with extendedLib;
+    assertNoDuplicateKeys (
+      flatten (bk.attrs.snakeKeys (
         mapAttrsToList
           (k: v:
             (
               mapAttrsToList (k2: v2: v2) v
-            )) (sanitize result.config).steps
-      )));
+            ))
+          (filterAttrs (name: _: name == "triggers" || name == "commands" || name == "inputs") (sanitize result.config).steps)
+      ))
+    );
 in
 {
   inherit steps;

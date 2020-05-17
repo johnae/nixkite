@@ -4,13 +4,17 @@ let
   steps = config.steps;
 
   allKeys = conf: flatten (
-    mapAttrsToList (
-      _: v:
-        if v == null
-        then [ ] else mapAttrsToList (
-          _: s: if s.key != null then [ s.key ] else [ ]
-        ) v
-    ) conf
+    mapAttrsToList
+      (
+        _: v:
+          if v == null
+          then [ ] else mapAttrsToList
+            (
+              _: s: if hasAttr "key" s && s.key != null then [ s.key ] else [ ]
+            )
+            v
+      )
+      conf
   );
 
   retryModule = types.submodule {
@@ -58,10 +62,14 @@ let
       default = name;
     };
     dependsOn = mkOption {
-      type = with types; with builtins; nullOr
-        (coercedTo (listOf attrs)
-          (x: map (s: if typeOf s == "string" then s else s.key) x)
-          (listOf (enum (allKeys steps))));
+      type = bk.types.uniqueKeys steps;
+      #type = with types; with builtins;
+      #  nullOr (
+      #    coercedTo
+      #      (listOf attrs)
+      #      (x: map (s: if typeOf s == "string" then s else s.key) x)
+      #      (listOf (enum (allKeys steps)))
+      #  );
       default = null;
     };
     label = mkOption {
@@ -93,7 +101,8 @@ let
               type = ints.positive;
             };
           };
-        })));
+        }))
+        );
         default = null;
       };
       timeoutInMinutes = mkOption {
@@ -281,10 +290,12 @@ let
       fields = mkOption {
         apply = with lib; v:
           (
-            mapAttrsToList (
-              _: v:
-                (mapAttrsToList (_: v2: v2) v)
-            ) (filterAttrsRecursive (k: v: v != null) v)
+            mapAttrsToList
+              (
+                _: v:
+                  (mapAttrsToList (_: v2: v2) v)
+              )
+              (filterAttrsRecursive (k: v: v != null) v)
           );
         type = submodule ({ config, name, ... }: {
           options = {
