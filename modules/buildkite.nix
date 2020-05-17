@@ -63,13 +63,6 @@ let
     };
     dependsOn = mkOption {
       type = bk.types.uniqueKeys steps;
-      #type = with types; with builtins;
-      #  nullOr (
-      #    coercedTo
-      #      (listOf attrs)
-      #      (x: map (s: if typeOf s == "string" then s else s.key) x)
-      #      (listOf (enum (allKeys steps)))
-      #  );
       default = null;
     };
     label = mkOption {
@@ -314,10 +307,6 @@ let
   });
 in
 {
-  options.agents = mkOption {
-    type = with types; nullOr (attrsOf str);
-    default = null;
-  };
   options.steps = {
     commands = mkOption {
       type = with types; nullOr (attrsOf commandModule);
