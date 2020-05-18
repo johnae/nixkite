@@ -14,9 +14,9 @@ Since I've used Buildkite for quite some time and I've already gone through two 
 
 This is a bit opinionated and it doesn't expose all of Buildkite's functionality. This is based on the relatively new functionality introduced in Buildkite where you give your steps keys which can then be depended on in other steps. This way your pipeline becomes a directed acyclic graph. So this means so far that wait steps are not supported and neither are block steps (input steps do the same thing though in a DAG world).
 
-It is very early still and there may well be bugs. Still, I encourage you to try it out!
+It is very early still and there may well be some rough edges. Still, I encourage you to try it out! Also check out my [nixos-configuration](https://github.com/johnae/nixos-configuration) for some real world example usage.
 
-I'll write some usage instructions soon:ish, but this is what a pipeline looks like currently:
+This is an example of what a pipeline looks like:
 
 ```nix
 { cfg, pkgs }:
