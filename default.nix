@@ -20,10 +20,19 @@ let
 
   config = import pipeline { inherit pkgs; lib = extendedLib; cfg = result.config; };
 
+  modules = with extendedLib;
+    mapAttrsToList
+      (name: _: ./modules + "/${name}")
+      (
+        filterAttrs
+          (name: _: hasSuffix ".nix" name)
+          (builtins.readDir ./modules)
+      )
+  ;
+
   result =
     extendedLib.evalModules {
-      modules = [
-        ./modules/buildkite.nix
+      modules = modules ++ [
         config
       ];
       args = { inherit config; lib = extendedLib; };
