@@ -22,6 +22,7 @@ with cfg.steps; {
 
     commands.deploy-development = {
       dependsOn = [ commands.docker ];
+      retry.automatic.limit = 2;
       command = ''
         do this
         do that

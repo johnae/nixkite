@@ -20,7 +20,7 @@ let
   retryModule = types.submodule {
     options = {
       automatic = mkOption {
-        type = with types; either bool (submodule {
+        type = with types; nullOr (either bool (submodule {
           options = {
             exitStatus = mkOption {
               type = either ints.positive (enum [ "*" ]);
@@ -31,11 +31,12 @@ let
               default = null;
             };
           };
-        });
-        default = false;
+        })
+        );
+        default = null;
       };
       manual = mkOption {
-        type = with types; either bool (submodule {
+        type = with types; nullOr (either bool (submodule {
           options = {
             allowed = mkOption {
               type = nullOr bool;
@@ -50,8 +51,9 @@ let
               default = null;
             };
           };
-        });
-        default = false;
+        })
+        );
+        default = null;
       };
     };
   };
