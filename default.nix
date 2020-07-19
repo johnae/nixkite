@@ -1,7 +1,6 @@
-{ pipeline }:
+{ pipeline, pkgs ? import <nixpkgs> { } }:
 let
   bklib = import ./lib;
-  pkgs = import <nixpkgs> { };
   extendedLib = pkgs.lib.extend (self: super: bklib { lib = super; });
 
   sanitize =
