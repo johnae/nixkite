@@ -1,4 +1,4 @@
-{ pipeline, pkgs ? import <nixpkgs> { } }:
+{ pipeline, specialArgs ? { }, pkgs ? import <nixpkgs> { } }:
 let
   bklib = import ./lib;
   extendedLib = pkgs.lib.extend (self: super: bklib { lib = super; });
@@ -17,8 +17,6 @@ let
         (filterAttrs (name: value: name != "_module" && value != null) configuration);
     };
 
-  config = import pipeline { inherit pkgs; lib = extendedLib; cfg = result.config; };
-
   modules = with extendedLib;
     mapAttrsToList
       (name: _: ./modules + "/${name}")
@@ -32,9 +30,10 @@ let
   result =
     extendedLib.evalModules {
       modules = modules ++ [
-        config
+        pipeline
       ];
-      args = { inherit config; lib = extendedLib; };
+      args = { inherit pkgs; config = result.config; lib = extendedLib; };
+      inherit specialArgs;
     };
 
   assertNoDuplicateKeys = with builtins; with extendedLib; s:

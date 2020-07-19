@@ -1,4 +1,4 @@
-{ cfg, pkgs, lib }:
+{ config, pkgs, lib, ... }:
 let
   cacheCmd = agents: {
     inherit agents;
@@ -8,7 +8,7 @@ let
     '';
   };
 in
-with cfg.steps; {
+with config.steps; {
 
   steps = {
 
